@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %} messages {% endblock %}
+{% block content %}
+
+    {% load static %}
+
+<div id="app">
+    <div class="container-fluid">
+        <table class="table table-bordered table-dark">
+            <thead>
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">order_day</th>
+                <th scope="col">city</th>
+                <th scope="col">transaction_id</th>
+                <th scope="col">number</th>
+            </tr>
+            </thead>
+            <tbody id="body-content">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+    <script
+            src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"
+    ></script>
+    <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"
+    ></script>
+    <script
+            src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"
+    ></script>
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.2.9/firebase.js"></script>
+
+    <!-- <script src="https://www.gstatic.com/firebasejs/6.2.4/firebase-database.js"></script> -->
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.2.9/firebase-analytics.js"></script>
+    <script>
+    const bodyContent = document.getElementById("body-content");
+        const firebaseConfig = {
+            apiKey: "AIzaSyCdpPPmSfzSskB8J4tz2A-9biVcEUHWbt0",
+            authDomain: "kassa-aparat.firebaseapp.com",
+            databaseURL: "https://kassa-aparat-default-rtdb.firebaseio.com",
+            projectId: "kassa-aparat",
+            storageBucket: "kassa-aparat.appspot.com",
+            messagingSenderId: "853493336271",
+            appId: "1:853493336271:web:67bbc5c5d5ab2e2b898fba",
+            measurementId: "G-V6ME58Q4F7"
+        };
+       firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+
+
+var starCountRef = firebase.database().ref("orders");
+// console.log(starCountRef)
+starCountRef.on("value", (snapshot) => {
+    let arrayOfTable = []
+    const data = snapshot.val();
+    let keys = Object.keys(data);
+    let last_key = keys.slice(-1)
+
+    // for (let i = 0; i < keys.length; i++) {
+    //     console.log(keys[i])
+    // }
+
+    keys.slice().reverse().forEach((key) => {
+        const singleData = data[key];
+        arrayOfTable.push(
+            `<tr>
+            <div class="diver">
+                <td>${singleData['id']}</td>
+                <td>${singleData['order_day']}</td>
+                <td>${singleData['city']}</td>
+                <td>${singleData['transaction_id']}</td>
+                <td>${singleData['number']}</td>
+            </div>
+            </tr>
+            `
+        );
+    })
+    bodyContent.innerHTML = arrayOfTable;
+
+    const arrayOfButtons = document.querySelectorAll('.specialBtn');
+    for (let index = 0; index < arrayOfButtons.length; index++) {
+        const element = arrayOfButtons[index];
+        element.addEventListener("click", fetchData)
+    }
+});
+
+
+function fetchData(selected_data) {
+    let all_data = selected_data.target.getAttribute("data-all")
+    let button_type = selected_data.target.getAttribute("data-buttonType")
+    let order_id = selected_data.target.getAttribute("data-orderId")
+    let username = selected_data.target.getAttribute("data-userName")
+    let totalAmount = selected_data.target.getAttribute("data-totalAmount")
+    let meals = selected_data.target.getAttribute("data-meals")
+    let selected_data_to_send = {
+        "all_data": all_data,
+        "button_type": button_type,
+        "order_id": order_id,
+        "username": username,
+        "total_amount": totalAmount,
+        "meals": meals,
+    };
+    fetch("https://ansorfamily.uz/receive", {
+        method: "POST", // or 'PUT'
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(selected_data_to_send),
+    })
+
+};
+
+
+
+    </script>
+
+{% endblock %}
+
+

@@ -1,0 +1,11 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('SmartOne admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">{{ "SmartOne admin login" }}</h1>
+{% endblock %}
+
+{% block nav-global %}
+
+{% endblock %}

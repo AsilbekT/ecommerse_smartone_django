@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+{% block title %} store {% endblock %}
+{% block content %}
+    <h1>{% trans "Product name" %}</h1>
+    {% get_current_language as CURRENT_LANGUAGE %}
+    {{ CURRENT_LANGUAGE }}
+    <div class="row">
+        {% for product in products %}
+            <div class="col-lg-4">
+                <img class="thumbnail" src="{{ product.product_url }}" alt="">
+                <div class="box-element product">
+                    <h6><strong>{{ product }}</strong></h6>
+                    <hr>
+                    <button class="btn btn-outline-secondary add-btn update-btn" data-product="{{ product.id }}" data-action="add">Add to Cart</button>
+                    <a class="btn btn-outline-success" href="#">View</a>
+                    <h4 style="display: inline-block; float: right"><strong>${{ product.price }}</strong></h4>
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+
+{% endblock %}
+
+

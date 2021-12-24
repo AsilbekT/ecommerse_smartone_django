@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="box-element" id="form-wrapper">
+                <form id="form">
+                    <div id="user-info">
+                        <div class="form-field">
+                            <input required class="form-control" type="text" name="name" placeholder="Name..">
+                        </div>
+                        <div class="form-field">
+                            <input required class="form-control" type="email" name="email" placeholder="Email..">
+                        </div>
+                    </div>
+
+
+                    <hr>
+                    <input id="form-button" class="btn btn-success btn-block" type="submit" value="Continue">
+                </form>
+            </div>
+
+            <br>
+            <button id="make-payment" class="btn btn-success btn-block" type="submit">Continue</button>
+            <br>
+
+            <div class="box-element hidden" id="payment-info">
+                <form id="click_form" action="https://my.click.uz/services/pay" method="get" target="_blank">
+                    <input type="hidden" name="amount" value="{{ order.get_cart_total }}"/>
+                    <input type="hidden" name="merchant_id" value="46"/>
+                    <input type="hidden" name="merchant_user_id" value="4"/>
+                    <input type="hidden" name="service_id" value="36"/>
+                    <input type="hidden" name="transaction_param" value="user23151"/>
+                    <input type="hidden" name="return_url" value="{% url 'checkout' %}"/>
+                    <input type="hidden" name="card_type" value="uzcard/humo"/>
+                    <button type="submit" class="btn btn-primary click_logo"><i></i>CLICK orqali to'lov qilish</button>
+                </form>
+
+                <br>
+                <body onload="Paycom.Button('#form-payme', '#button-container')">
+                <form id="form-payme" method="POST" action="https://checkout.paycom.uz/">
+                    <input type="hidden" name="merchant" value="61c051b10dd0408a5b235b18">
+                    <input type="hidden" name="account[order_id]" value="120">
+                    <input type="hidden" name="amount" value="500">
+                    <input type="hidden" name="lang" value="uz">
+                    <input type="hidden" name="button" data-type="svg" value="colored">
+                    <div id="button-container"></div>
+                </form>
+                <!-- ... -->
+                <script src="https://cdn.paycom.uz/integration/js/checkout.min.js"></script>
+                </body>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-6">
+            <div class="box-element">
+                <a class="btn btn-outline-dark" href="{% url 'cart' %}">&#x2190; Back to Cart</a>
+                <hr>
+                <h3>Order Summary</h3>
+                <hr>
+                {% for item in items %}
+                    <div class="cart-row">
+                        <div style="flex:2"><img class="row-image" src="{{ item.product.product_url }}"></div>
+                        <div style="flex:2"><p>{{ item.product.name }}</p></div>
+                        <div style="flex:1"><p>${{ item.get_total }}</p></div>
+                        <div style="flex:1"><p>x{{ item.quantity }}</p></div>
+                    </div>
+                {% endfor %}
+                <h5>Items: {{ order.get_cart_items }}</h5>
+                <h5>Total: ${{ order.get_cart_total|floatformat:2 }}</h5>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        if (user != 'AnonymousUser') {
+            document.getElementById('form-wrapper').classList.add("hidden")
+            document.getElementById('user-info').innerHTML = ''
+            document.getElementById('payment-info').classList.remove("hidden")
+
+        }
+        var total = '{{ order.get_cart_total }}'
+        var form = document.getElementById("form")
+        form.addEventListener('submit', function (e) {
+            e.preventDefault()
+            console.log('form submitted')
+            document.getElementById('form-button').classList.add("hidden")
+            document.getElementById('payment-info').classList.remove("hidden")
+        })
+
+        let paymentBtn = document.getElementById('make-payment')
+        if (paymentBtn) {
+            paymentBtn.addEventListener('click', function (e) {
+                submitFormData()
+            })
+        }
+
+        function submitFormData() {
+            console.log("payment button clicked")
+            var userFormData = {
+                'name': null,
+                'email': null,
+                'total': total
+            }
+            if (user == "AnonymousUser") {
+                userFormData.name = form.name.value,
+                    userFormData.email = form.email.value
+            }
+            var url = "/process_order/"
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({"form": userFormData})
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log("Success: ", data)
+                    alert("Transaction completed")
+                    cart = {}
+                    document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
+                    window.location.href = "{% url 'store' %}"
+                })
+        }
+
+    </script>
+
+{% endblock content %}
